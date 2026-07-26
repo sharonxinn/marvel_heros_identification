@@ -78,12 +78,49 @@ h1 em, h2 em { color: var(--acid); font-style: normal; }
 .loki .generic-head { background:#e8c9a5; }.loki .generic-head:before { background:#1c2619; top:-9px; height:57px; clip-path:polygon(0 75%,13% 26%,29% 49%,44% 0,56% 49%,71% 26%,100% 75%,85% 51%,76% 100%,24% 100%,15% 51%); }.loki .generic-body { background:#1c412d; }
 .widow .generic-head { background:#e6b293; }.widow .generic-head:before { background:#9c3d2f; height:117px; top:-3px; clip-path:polygon(0 25%,16% 0,42% 12%,58% 0,85% 10%,100% 28%,92% 100%,7% 100%); }.widow .generic-body { background:#1c1f29; }
 .captain .generic-head { background:#e8b995; }.captain .generic-head:before { background:#a87551; top:-6px; }.captain .generic-body { background:#284f88; }
+.scarlet .generic-head { background:#d59a89; clip-path:polygon(18% 0,82% 0,96% 24%,89% 100%,11% 100%,4% 24%); }
+.scarlet .generic-head:before { inset:-10px 14px auto; width:62px; height:54px; background:#551a2f; clip-path:polygon(0 78%,17% 18%,34% 52%,50% 0,66% 52%,83% 18%,100% 78%,86% 56%,75% 100%,25% 100%,14% 56%); }
+.scarlet .generic-head:after { display:none; }
+.scarlet .generic-body { background:#5a1b34; }
+.hulk .generic-head { background:#94c97f; clip-path:polygon(20% 0,80% 0,100% 34%,90% 100%,10% 100%,0 34%); }
+.hulk .generic-head:before { inset:18px 10px auto; width:70px; height:18px; background:#24461b; clip-path:polygon(0 35%,20% 0,35% 35%,50% 0,65% 35%,80% 0,100% 35%,88% 100%,12% 100%); }
+.hulk .generic-head:after { top:61px; left:13px; width:64px; height:12px; background:#1d3314; clip-path:polygon(0 0,100% 0,82% 100%,18% 100%); }
+.hulk .generic-body { background:#2d5f1f; }
+.moon .generic-head { background:#e8dec7; border-radius:44% 44% 40% 40%; clip-path:polygon(23% 0,77% 0,94% 31%,84% 100%,16% 100%,6% 31%); }
+.moon .generic-head:before { inset:14px 17px auto; width:54px; height:76px; background:linear-gradient(180deg,#f2efe6 0 55%,#b8b1a0 56%); clip-path:polygon(0 0,30% 0,50% 18%,70% 0,100% 0,88% 100%,12% 100%); }
+.moon .generic-head:after { display:none; }
+.moon .generic-body { background:#474245; }
+.bolt .generic-head { background:#dcdfe6; clip-path:polygon(26% 0,74% 0,92% 18%,100% 47%,85% 100%,15% 100%,0 47%,8% 18%); }
+.bolt .generic-head:before { inset:18px 18px auto; width:54px; height:62px; background:#414a67; clip-path:polygon(0 0,100% 0,82% 100%,18% 100%); }
+.bolt .generic-head:after { top:36px; left:29px; width:32px; height:26px; background:#f2f4ff; clip-path:polygon(0 0,100% 0,76% 100%,24% 100%); }
+.bolt .generic-body { background:#5b6586; }
+.antman .generic-head { background:#d74d37; clip-path:polygon(28% 0,72% 0,91% 23%,82% 100%,18% 100%,9% 23%); }
+.antman .generic-head:before { inset:21px 12px auto; width:66px; height:36px; background:#1a1a1d; clip-path:polygon(0 34%,16% 0,50% 18%,84% 0,100% 34%,88% 100%,12% 100%); }
+.antman .generic-head:after { top:55px; left:22px; width:42px; height:10px; background:#f2c76d; clip-path:polygon(0 0,100% 0,87% 100%,13% 100%); }
+.antman .generic-body { background:#9e2f27; }
+.vision .generic-head { background:#cfdce8; clip-path:polygon(16% 0,84% 0,100% 30%,88% 100%,12% 100%,0 30%); }
+.vision .generic-head:before { inset:16px 16px auto; width:56px; height:76px; background:#b43d39; clip-path:polygon(0 0,24% 0,38% 22%,62% 22%,76% 0,100% 0,88% 100%,12% 100%); }
+.vision .generic-head:after { top:58px; left:33px; width:22px; height:10px; background:#ffd45c; clip-path:polygon(0 0,100% 0,82% 100%,18% 100%); }
+.vision .generic-body { background:#4f90aa; }
+.starlord .generic-head { background:#ddb08f; clip-path:polygon(18% 0,82% 0,96% 22%,88% 100%,12% 100%,4% 22%); }
+.starlord .generic-head:before { inset:-6px 8px auto; width:74px; height:40px; background:#702d1d; clip-path:polygon(0 65%,15% 22%,30% 40%,50% 0,70% 40%,85% 22%,100% 65%,88% 100%,12% 100%); }
+.starlord .generic-head:after { top:55px; left:16px; width:60px; height:10px; background:#3a2c52; clip-path:polygon(0 0,100% 0,82% 100%,18% 100%); }
+.starlord .generic-body { background:#28406b; }
+.captain-marvel .generic-head { background:#efc6a2; clip-path:polygon(18% 0,82% 0,96% 28%,88% 100%,12% 100%,4% 28%); }
+.captain-marvel .generic-head:before { inset:8px 16px auto; width:58px; height:64px; background:#2d498c; clip-path:polygon(0 0,50% 0,64% 20%,78% 0,100% 0,88% 100%,12% 100%); }
+.captain-marvel .generic-head:after { top:50px; left:32px; width:24px; height:10px; background:#ffd24f; clip-path:polygon(0 0,100% 0,83% 100%,17% 100%); }
+.captain-marvel .generic-body { background:#6c264d; }
+.venom .generic-head { background:#212329; clip-path:polygon(17% 0,83% 0,100% 22%,91% 100%,9% 100%,0 22%); }
+.venom .generic-head:before { inset:15px 13px auto; width:64px; height:72px; background:#f0f0ef; clip-path:polygon(0 0,100% 0,84% 100%,16% 100%); }
+.venom .generic-head:after { top:44px; left:14px; width:62px; height:18px; background:#0f0f12; clip-path:polygon(0 18%,20% 0,35% 20%,50% 0,65% 20%,80% 0,100% 18%,89% 100%,11% 100%); }
+.venom .generic-body { background:#0d1116; }
 .result-avatar:not(.iron):before { background:linear-gradient(110deg,#4b2e39 0 30%,#e6b493 31% 72%,#4b2e39 73%); clip-path:polygon(20% 0,80% 0,100% 27%,85% 100%,15% 100%,0 27%); }
 .result-avatar:not(.iron):after { background:#263b5d; }
 .result-avatar.spider:before { background:#d52930; }.result-avatar.panther:before { background:#181925; }.result-avatar.widow:after,.result-avatar.scarlet:after { background:#8e2940; }.result-avatar.thor:after { background:#323640; }
+.result-avatar.hulk:before { background:#8bc36b; }.result-avatar.moon:before { background:#e7dcc7; }.result-avatar.bolt:before { background:#cdd5e4; }.result-avatar.antman:before { background:#d74d37; }.result-avatar.vision:before { background:#d7e3ee; }.result-avatar.starlord:before { background:#d9ac8a; }.result-avatar.captain-marvel:before { background:#efc6a2; }.result-avatar.venom:before { background:#1f2128; }
 
 .preview-video { position:absolute; z-index:1; inset:0; width:100%; height:100%; object-fit:cover; transform:scaleX(-1); }
-.youtube-audio-host { position:fixed; width:1px; height:1px; right:0; bottom:0; overflow:hidden; opacity:0; pointer-events:none; }
+.soundcloud-audio-host { position:fixed; width:1px; height:1px; right:0; bottom:0; overflow:hidden; opacity:0; pointer-events:none; border:0; }
 .analysis-error { position:absolute; inset:40px 25px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
 .analysis-error > span { display:grid; place-items:center; width:42px; height:42px; margin-bottom:19px; border:1px solid #d55a52; color:#ff7f75; font:18px var(--mono); }
 .analysis-error h3 { margin:0 0 10px; font:500 17px/1.15 var(--display); letter-spacing:-.07em; }

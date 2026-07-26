@@ -86,7 +86,7 @@ Open [http://127.0.0.1:5500](http://127.0.0.1:5500). The scanner header will say
 
 ## Background music
 
-Use the `SOUND: OFF` control in the top-right corner to start the YouTube video selected for this project. It is embedded from YouTube rather than downloaded or copied into the project, and it starts only after a click because browsers block autoplay audio.
+Use the `SOUND: OFF` control in the top-right corner to start the SoundCloud track selected for this project. It is embedded from SoundCloud rather than downloaded or copied into the project, and it starts only after a click because browsers block autoplay audio.
 
 ## API response
 

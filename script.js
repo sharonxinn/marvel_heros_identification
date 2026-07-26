@@ -1,14 +1,4 @@
-const heroes = [
-  { id: "iron_man", name: "IRON MAN", alias: "TONY STARK", type: "AVENGER", short: "A brilliant inventor in a suit of armor, turning recklessness into responsibility.", story: "Tony Stark begins as a genius weapons maker whose captivity forces him to build the first Iron Man armor. Back home, he trades the life of an arms dealer for something harder: using his inventions, ego, and courage to protect a world he helped endanger.", traits: ["Genius inventor", "Arc reactor", "Armor systems"], className: "iron", glow: "rgba(237, 72, 48, .4)" },
-  { id: "spider_man", name: "SPIDER-MAN", alias: "PETER PARKER", type: "STREET HERO", short: "A young hero balancing impossible responsibility with an ordinary life.", story: "After a radioactive spider bite gives Peter Parker astonishing abilities, a personal loss teaches him what power really costs. Between school, family, and villains larger than life, he keeps choosing to help—because he knows no one else may be there.", traits: ["Spider-sense", "Wall-crawling", "Web engineering"], className: "spider", glow: "rgba(228, 47, 47, .38)" },
-  { id: "doctor_strange", name: "DOCTOR STRANGE", alias: "STEPHEN STRANGE", type: "MYSTIC ARTS", short: "A gifted surgeon who learns that reality is stranger—and wider—than he imagined.", story: "A devastating injury strips Stephen Strange of the surgical skill that defined him. His search for healing leads to the mystic arts, where he exchanges certainty for discipline and becomes a guardian of Earth against threats that bend time, space, and reason.", traits: ["Sorcery", "Time manipulation", "Sanctum guardian"], className: "strange", glow: "rgba(212, 98, 41, .36)" },
-  { id: "black_panther", name: "BLACK PANTHER", alias: "T'CHALLA", type: "WAKANDA", short: "A king, scientist, and protector carrying the future of Wakanda.", story: "T'Challa inherits both the mantle of the Black Panther and the responsibility of leading Wakanda. With the strength of the heart-shaped herb and the insight to challenge old traditions, he works to protect his nation while deciding how it should meet the world.", traits: ["Vibranium suit", "Enhanced senses", "Strategic leader"], className: "panther", glow: "rgba(136, 93, 255, .4)" },
-  { id: "thor", name: "THOR", alias: "THOR ODINSON", type: "ASGARD", short: "The God of Thunder, learning that worth is earned rather than inherited.", story: "Once a proud prince of Asgard, Thor is cast to Earth and humbled by a world that does not care about his title. He grows into a defender of the Nine Realms—not through strength alone, but through loyalty, sacrifice, and a willingness to change.", traits: ["Mjolnir", "Stormcalling", "Asgardian"], className: "thor", glow: "rgba(91, 153, 247, .35)" },
-  { id: "loki", name: "LOKI", alias: "LOKI LAUFEYSON", type: "ASGARD", short: "The god of mischief: clever, complicated, and always one step sideways.", story: "Raised as an Asgardian prince while carrying the secret of his Frost Giant birth, Loki spends much of his life searching for a place to belong. His gifts for illusion and strategy make him dangerous, but beneath the mischief is a character constantly choosing between ambition, family, and redemption.", traits: ["Illusion magic", "Shape-shifting", "Master tactician"], className: "loki", glow: "rgba(107, 194, 79, .38)" },
-  { id: "black_widow", name: "BLACK WIDOW", alias: "NATASHA ROMANOFF", type: "AVENGER", short: "A master spy determined to make her second chance count.", story: "Natasha Romanoff was trained to be a weapon in the Red Room, but she chooses a different path. Her sharp instincts and unshakable resolve make her an Avenger, while her past gives every act of trust and sacrifice a deeper meaning.", traits: ["Master spy", "Combat expert", "Tactical mind"], className: "widow", glow: "rgba(212, 62, 48, .38)" },
-  { id: "captain_america", name: "CAPTAIN AMERICA", alias: "STEVE ROGERS", type: "AVENGER", short: "A soldier from another era whose moral compass never moved.", story: "Steve Rogers starts as a small but determined volunteer who is chosen for the Super Soldier program because of his character. Awakened decades after the war, he becomes Captain America: a leader who believes freedom is worth defending, even when doing so is difficult.", traits: ["Super soldier", "Vibranium shield", "Field leader"], className: "captain", glow: "rgba(65, 123, 226, .4)" },
-  { id: "scarlet_witch", name: "SCARLET WITCH", alias: "WANDA MAXIMOFF", type: "MYSTIC ARTS", short: "A powerful being whose grief and hope can reshape reality itself.", story: "Wanda Maximoff's life is shaped by loss, love, and power she is still learning to understand. From an uneasy ally to an Avenger, she confronts the question at the heart of her story: how do you live with the consequences of changing the world?", traits: ["Chaos magic", "Telekinesis", "Reality warping"], className: "scarlet", glow: "rgba(238, 46, 89, .37)" },
-];
+const heroes = window.HERO_PROFILES || [];
 
 const API_BASE_URL = "http://127.0.0.1:8000";
 const archiveGrid = document.querySelector("#archive-grid");
@@ -43,59 +33,50 @@ let uploadedFile = null;
 let currentObjectUrl = null;
 let cameraStream = null;
 let cameraVideo = null;
-const YOUTUBE_VIDEO_ID = "F_mhWxOjxp4";
-let youtubePlayer = null;
-let youtubePlayerPromise = null;
+const SOUNDCLOUD_TRACK_URL = "https://soundcloud.com/davidstunes/avengers-infinity-war-theme?utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing";
+let soundcloudWidget = null;
+let soundcloudWidgetPromise = null;
 
-function loadYoutubePlayer() {
-  if (youtubePlayer) return Promise.resolve(youtubePlayer);
-  if (youtubePlayerPromise) return youtubePlayerPromise;
-  youtubePlayerPromise = new Promise((resolve, reject) => {
-    const mountPlayer = () => {
-      youtubePlayer = new window.YT.Player("youtube-audio-host", {
-        width: "1",
-        height: "1",
-        videoId: YOUTUBE_VIDEO_ID,
-        playerVars: {
-          autoplay: 0,
-          controls: 0,
-          disablekb: 1,
-          fs: 0,
-          loop: 1,
-          modestbranding: 1,
-          playlist: YOUTUBE_VIDEO_ID,
-          rel: 0,
-        },
-        events: {
-          onReady: event => { event.target.setVolume(35); resolve(event.target); },
-          onError: () => reject(new Error("The selected YouTube audio could not be loaded.")),
-        },
+function loadSoundCloudWidget() {
+  if (soundcloudWidget) return Promise.resolve(soundcloudWidget);
+  if (soundcloudWidgetPromise) return soundcloudWidgetPromise;
+  soundcloudWidgetPromise = new Promise((resolve, reject) => {
+    const mountWidget = () => {
+      const iframe = document.querySelector("#soundcloud-audio-host");
+      if (!iframe) {
+        reject(new Error("The SoundCloud player host could not be found."));
+        return;
+      }
+      soundcloudWidget = window.SC.Widget(iframe);
+      soundcloudWidget.bind(window.SC.Widget.Events.READY, () => {
+        soundcloudWidget.setVolume(35);
+        resolve(soundcloudWidget);
+      });
+      soundcloudWidget.bind(window.SC.Widget.Events.ERROR, () => {
+        reject(new Error("The selected SoundCloud track could not be loaded."));
       });
     };
-    if (window.YT && window.YT.Player) {
-      mountPlayer();
+    if (window.SC && window.SC.Widget) {
+      mountWidget();
       return;
     }
-    const previousReady = window.onYouTubeIframeAPIReady;
-    window.onYouTubeIframeAPIReady = () => {
-      if (typeof previousReady === "function") previousReady();
-      mountPlayer();
-    };
     const apiScript = document.createElement("script");
-    apiScript.src = "https://www.youtube.com/iframe_api";
-    apiScript.onerror = () => reject(new Error("YouTube could not be reached."));
+    apiScript.src = "https://w.soundcloud.com/player/api.js";
+    apiScript.async = true;
+    apiScript.onerror = () => reject(new Error("SoundCloud could not be reached."));
+    apiScript.onload = mountWidget;
     document.head.append(apiScript);
   });
-  return youtubePlayerPromise;
+  return soundcloudWidgetPromise;
 }
 
 async function startBackgroundMusic() {
-  const player = await loadYoutubePlayer();
-  player.playVideo();
+  const widget = await loadSoundCloudWidget();
+  widget.play();
 }
 
 function stopBackgroundMusic() {
-  if (youtubePlayer) youtubePlayer.pauseVideo();
+  if (soundcloudWidget) soundcloudWidget.pause();
 }
 
 function portraitMarkup(hero) {
