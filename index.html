@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A cinematic computer-vision concept for recognizing Marvel heroes and exploring their stories."
+    />
+    <title>MARVEL // VISION ARCHIVE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&family=Unbounded:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="noise" aria-hidden="true"></div>
+    <div class="ambient ambient-one" aria-hidden="true"></div>
+    <div class="ambient ambient-two" aria-hidden="true"></div>
+
+    <main>
+      <nav class="nav wrap">
+        <a class="brand" href="#top" aria-label="Vision Archive home">
+          <span class="brand-mark">M</span>
+          <span>VISION<span class="brand-muted">/ARCHIVE</span></span>
+        </a>
+        <div class="nav-links">
+          <a href="#scanner">Scanner</a>
+          <a href="#archive">Archive</a>
+          <a href="#about">About</a>
+        </div>
+        <button class="sound-toggle" type="button" aria-label="Toggle interface sound">
+          <span class="sound-bars"><i></i><i></i><i></i></span>
+          <span class="sound-label">SOUND: OFF</span>
+        </button>
+      </nav>
+
+      <section id="top" class="hero wrap">
+        <div class="hero-copy">
+          <p class="eyebrow"><span></span> Universe classification interface v1.0</p>
+          <h1>WHO'S IN<br /><em>THE FRAME?</em></h1>
+          <p class="hero-description">
+            A cinematic vision system that recognizes legendary faces and unlocks the story behind the suit.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#scanner">Begin a scan <span>↗</span></a>
+            <button class="button button-ghost" type="button" data-scroll-to="archive">Explore archive <span>↓</span></button>
+          </div>
+          <div class="system-status">
+            <span class="pulse-dot"></span>
+            <span>NEURAL NETWORK ONLINE</span>
+            <span class="status-divider"></span>
+            <span>8 HERO PROFILES</span>
+          </div>
+        </div>
+
+        <div class="hero-art" aria-hidden="true">
+          <div class="orbit orbit-one"></div>
+          <div class="orbit orbit-two"></div>
+          <div class="hero-stamp stamp-top">RECOGNITION<br />SYSTEM</div>
+          <div class="hero-stamp stamp-bottom">EARTH<br />616.08</div>
+          <div class="portrait portrait-iron">
+            <div class="helmet">
+              <div class="helmet-top"></div>
+              <div class="helmet-face"><i></i><i></i></div>
+              <div class="helmet-jaw"></div>
+            </div>
+            <div class="portrait-chest"><div class="arc-core"></div></div>
+          </div>
+          <div class="target-ring"><span></span><span></span><span></span></div>
+          <div class="scan-line"></div>
+          <div class="hero-code">SUBJECT // 001<br />STARK, T.</div>
+        </div>
+      </section>
+
+      <section id="scanner" class="scanner-section wrap">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow"><span></span> Recognition bay</p>
+            <h2>SCAN A HERO</h2>
+          </div>
+          <p>Upload a portrait, drop an image, or try a trained archive sample.</p>
+        </div>
+
+        <div class="scanner-grid">
+          <div class="scan-console">
+            <div class="console-header">
+              <div><span class="tiny-dot red"></span><span class="tiny-dot amber"></span><span class="tiny-dot green"></span></div>
+              <span>LIVE_INPUT // FACE_DETECTION</span>
+              <span class="console-id">CAM_01</span>
+            </div>
+            <div id="drop-zone" class="drop-zone" tabindex="0" role="button" aria-label="Upload a hero portrait">
+              <input id="image-input" type="file" accept="image/*" />
+              <div id="preview-container" class="preview-container">
+                <div class="scan-corners"><i></i><i></i><i></i><i></i></div>
+                <div class="face-guide"><span class="guide-eye left"></span><span class="guide-eye right"></span><span class="guide-line"></span></div>
+                <div class="scan-grid"></div>
+                <p class="drop-icon">+</p>
+                <p class="drop-title">DROP A PORTRAIT</p>
+                <p class="drop-subtitle">or <u>browse files</u> • JPG, PNG, WEBP</p>
+                <div class="drop-footer"><span>FACE REGION: WAITING</span><span>0.00 FPS</span></div>
+              </div>
+            </div>
+            <div class="console-actions">
+              <button id="camera-button" class="button button-ghost camera-button" type="button"><span>◉</span> Use camera</button>
+              <button id="analyze-button" class="button button-primary analyze-button" type="button" disabled>Identify subject <span>↗</span></button>
+            </div>
+          </div>
+
+          <aside id="result-panel" class="result-panel">
+            <div class="result-header"><span>ANALYSIS OUTPUT</span><span id="model-state" class="ready-state">CHECKING MODEL</span></div>
+            <div id="empty-result" class="empty-result">
+              <div class="empty-orb"><span></span></div>
+              <h3>WAITING FOR<br />A SUBJECT</h3>
+              <p>Your scan will return a likely identity, confidence score, and a story file.</p>
+            </div>
+            <div id="analysis-loading" class="analysis-loading hidden">
+              <div class="loader-rings"><i></i><i></i><i></i></div>
+              <p id="loading-message">Extracting facial features...</p>
+              <span id="loading-progress">0%</span>
+            </div>
+            <div id="analysis-error" class="analysis-error hidden" role="alert">
+              <span>!</span>
+              <h3>NO VERIFIED MATCH</h3>
+              <p id="error-message">The local recognition model could not return a profile.</p>
+              <button id="retry-scan" class="text-button" type="button">Try another image <span>↗</span></button>
+            </div>
+            <div id="hero-result" class="hero-result hidden" aria-live="polite">
+              <div class="result-identity">
+                <div id="result-avatar" class="result-avatar portrait-mini portrait-iron"></div>
+                <div><p>IDENTITY MATCH</p><h3 id="result-name">IRON MAN</h3></div>
+                <button id="close-result" type="button" aria-label="Close result">×</button>
+              </div>
+              <div class="confidence-row"><span>MODEL CONFIDENCE</span><strong id="confidence-value">97.8%</strong></div>
+              <div class="confidence-track"><i id="confidence-bar"></i></div>
+              <p id="result-description" class="result-description"></p>
+              <button id="open-story" class="story-button" type="button">Open story file <span>→</span></button>
+            </div>
+          </aside>
+        </div>
+
+        <div class="model-notice"><span class="pulse-dot"></span><span>REAL MODEL MODE</span><p>The interface displays only the label and confidence returned by your local trained model.</p></div>
+      </section>
+
+      <section id="archive" class="archive-section wrap">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow"><span></span> Character database</p>
+            <h2>THE ARCHIVE</h2>
+          </div>
+          <button id="view-all-button" class="text-button" type="button">View all profiles <span>↘</span></button>
+        </div>
+        <div id="archive-grid" class="archive-grid"></div>
+      </section>
+
+      <section id="about" class="how-section wrap">
+        <div class="how-intro">
+          <p class="eyebrow"><span></span> Under the hood</p>
+          <h2>BUILT FOR<br /><em>THE MULTIVERSE.</em></h2>
+        </div>
+        <div class="how-steps">
+          <article><span>01</span><h3>DETECT</h3><p>A face detector finds and aligns the subject before classification.</p></article>
+          <article><span>02</span><h3>EMBED</h3><p>A vision encoder turns facial features into a searchable identity vector.</p></article>
+          <article><span>03</span><h3>REVEAL</h3><p>The closest profile unlocks the hero's origin, mission, and story timeline.</p></article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer wrap">
+      <div class="brand"><span class="brand-mark">M</span><span>VISION<span class="brand-muted">/ARCHIVE</span></span></div>
+      <p>Concept interface for a Marvel hero recognition project. Fan-made, not affiliated with Marvel.</p>
+      <a href="#top">Back to top ↑</a>
+    </footer>
+
+    <dialog id="story-modal" class="story-modal">
+      <button id="close-modal" class="modal-close" type="button" aria-label="Close story">×</button>
+      <div class="modal-profile">
+        <div id="modal-portrait" class="modal-portrait portrait-iron"></div>
+        <div><p id="modal-file">STORY_FILE // 001</p><h2 id="modal-name">IRON MAN</h2><span id="modal-alias">TONY STARK</span></div>
+      </div>
+      <p id="modal-story" class="modal-story"></p>
+      <div id="modal-traits" class="modal-traits"></div>
+      <div class="modal-footer"><span>PROFILE VERIFIED</span><button id="scan-another" class="text-button" type="button">Scan another <span>↗</span></button></div>
+    </dialog>
+    <div id="youtube-audio-host" class="youtube-audio-host" aria-hidden="true"></div>
+    <script src="script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "accuracy": 1.0,
+  "labels": [
+    "black_widow",
+    "loki"
+  ],
+  "confusion_matrix": [
+    [
+      1,
+      0
+    ],
+    [
+      0,
+      1
+    ]
+  ]
+}
