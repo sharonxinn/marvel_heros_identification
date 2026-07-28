@@ -310,3 +310,96 @@ if (themeToggle) {
   });
 }
 initTheme();
+
+// --- Simple Hero Chatbot (client-side, uses HERO_PROFILES) ---
+const chatPanel = document.getElementById('hero-chat');
+const openChat = document.getElementById('open-chat');
+const closeChat = document.getElementById('close-chat');
+const chatForm = document.getElementById('chat-form');
+const chatInput = document.getElementById('chat-input');
+const chatMessages = document.getElementById('chat-messages');
+
+function appendMessage(text, who = 'bot') {
+  const wrap = document.createElement('div');
+  wrap.className = `chat-message ${who}`;
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.innerHTML = text;
+  wrap.appendChild(bubble);
+  chatMessages.appendChild(wrap);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function openChatPanel() { chatPanel.classList.remove('hidden'); chatInput.focus(); }
+function closeChatPanel() { chatPanel.classList.add('hidden'); }
+openChat && openChat.addEventListener('click', openChatPanel);
+closeChat && closeChat.addEventListener('click', closeChatPanel);
+
+function findHeroByQuery(q) {
+  const ql = q.toLowerCase();
+  // direct match by id, name, alias
+  const exact = window.HERO_PROFILES.find(h => h.id === ql || h.name.toLowerCase() === ql || h.alias.toLowerCase() === ql);
+  if (exact) return exact;
+  // partial match on name or alias
+  const partial = window.HERO_PROFILES.find(h => h.name.toLowerCase().includes(ql) || h.alias.toLowerCase().includes(ql));
+  if (partial) return partial;
+  return null;
+}
+
+function scoreHeroForQuery(hero, tokens) {
+  const hay = `${hero.name} ${hero.alias} ${hero.story} ${hero.traits.join(' ')}`.toLowerCase();
+  let score = 0;
+  tokens.forEach(t => { if (hay.includes(t)) score += 1; });
+  return score;
+}
+
+async function generateBotResponse(question) {
+  const q = (question || '').trim();
+  if (!q) return "Ask me about a hero's powers, affiliation, or story — try 'Who is Iron Man?'";
+  // quick list request
+  if (/list|all heroes|who are|show heroes|names of/.test(q.toLowerCase())) {
+    const names = window.HERO_PROFILES.slice(0, 12).map(h => h.name).join(', ');
+    return `Here are some heroes in the dataset: ${names} (and more). Ask about a name for details.`;
+  }
+
+  // try direct lookup
+  const direct = findHeroByQuery(q.replace(/who is |tell me about |what is |what are |powers of /ig, '').trim());
+  if (direct) {
+    return `<strong>${direct.name}</strong> — alias: ${direct.alias}. Role: ${direct.role}. Affiliation: ${direct.affiliation}. Abilities: ${direct.traits.slice(1,4).join(', ')}. ${direct.story}`;
+  }
+
+  // keyword scoring fallback
+  const tokens = q.toLowerCase().split(/\W+/).filter(Boolean);
+  const scored = window.HERO_PROFILES.map(h => ({ h, s: scoreHeroForQuery(h, tokens) })).sort((a,b) => b.s - a.s);
+  if (scored.length && scored[0].s > 0) {
+    const h = scored[0].h;
+    return `I think you might mean <strong>${h.name}</strong>. ${h.short} Abilities include: ${h.traits.slice(1,4).join(', ')}.`;
+  }
+
+  return "I couldn't find a good match in the local profiles — try asking 'Who is Black Widow?' or use a character name.";
+}
+
+chatForm && chatForm.addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const text = chatInput.value.trim();
+  if (!text) return;
+  appendMessage(text, 'user');
+  chatInput.value = '';
+  // typing indicator
+  const typing = document.createElement('div');
+  typing.className = 'chat-message bot';
+  typing.innerHTML = '<div class="bubble chat-typing">…</div>';
+  chatMessages.appendChild(typing);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  try {
+    const reply = await generateBotResponse(text);
+    typing.remove();
+    appendMessage(reply, 'bot');
+  } catch (e) {
+    typing.remove();
+    appendMessage("Sorry, I couldn't process that question.", 'bot');
+  }
+});
+
+// welcome message
+appendMessage('Hi — ask me about any hero in the archive. Try: "Who is Thor?"');

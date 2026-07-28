@@ -199,5 +199,17 @@
     ></iframe>
     <script src="hero-data.js"></script>
     <script src="script.js"></script>
+    <!-- Chat widget -->
+    <div class="chat-launch" aria-hidden="false">
+      <button id="open-chat" class="chat-button" aria-label="Open hero chat">💬</button>
+    </div>
+    <div class="chat-panel hidden" id="hero-chat" role="dialog" aria-label="Hero chatbot">
+      <header class="chat-header"><strong>Hero Chat</strong><button id="close-chat" aria-label="Close chat">×</button></header>
+      <div class="chat-messages" id="chat-messages" aria-live="polite"></div>
+      <form id="chat-form" class="chat-form">
+        <input id="chat-input" type="text" placeholder="Ask about a hero, e.g. 'Who is Iron Man?'" autocomplete="off" />
+        <button type="submit">Send</button>
+      </form>
+    </div>
   </body>
 </html>

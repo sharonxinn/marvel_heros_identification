@@ -144,3 +144,20 @@ h1 em, h2 em { color: var(--acid); font-style: normal; }
 .model-notice { display:flex; align-items:center; gap:9px; margin-top:14px; padding:13px 15px; border:1px solid var(--line); color:var(--acid); font:10px var(--mono); letter-spacing:.05em; }
 .model-notice p { margin:0 0 0 auto; color:#7f8793; font:10px var(--mono); letter-spacing:0; }
 @media (max-width:520px) { .model-notice { align-items:flex-start; flex-wrap:wrap; } .model-notice p { width:100%; margin:4px 0 0 15px; } }
+
+/* Chat widget */
+.chat-launch { position: fixed; right: 22px; bottom: 22px; z-index: 60; }
+.chat-button { width: 52px; height: 52px; border-radius: 50%; border: 0; background: var(--acid); color: var(--ink); font-size: 20px; display: grid; place-items: center; box-shadow: 0 6px 20px rgba(0,0,0,.35); }
+.chat-panel { position: fixed; right: 22px; bottom: 86px; width: min(360px, 92%); max-height: 72vh; background: var(--panel); border: 1px solid var(--line); box-shadow: 0 20px 60px rgba(0,0,0,.6); border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; z-index: 70; }
+.chat-panel.hidden { display: none; }
+.chat-header { height: 46px; display:flex; align-items:center; justify-content:space-between; padding:0 12px; border-bottom:1px solid var(--line); font: 500 13px var(--body); color:var(--paper); }
+.chat-messages { padding: 12px; overflow:auto; flex:1 1 auto; font-size:14px; color:var(--paper); }
+.chat-form { display:flex; gap:8px; padding:10px; border-top:1px solid var(--line); background: linear-gradient(180deg, rgba(255,255,255,.01), transparent); }
+.chat-form input { flex:1; padding:10px 12px; border-radius:6px; border:1px solid rgba(255,255,255,.04); background:transparent; color:var(--paper); outline:none; }
+.chat-form button { padding:10px 14px; border-radius:6px; border:0; background:var(--acid); color:var(--ink); font-weight:600; }
+.chat-message { margin-bottom:10px; display:flex; gap:8px; }
+.chat-message.user { justify-content:flex-end; }
+.chat-message .bubble { max-width:78%; padding:10px 12px; border-radius:8px; background:rgba(255,255,255,0.04); color:var(--paper); }
+.chat-message.user .bubble { background:var(--acid); color:var(--ink); }
+.chat-message.bot .bubble { background: rgba(255,255,255,0.03); }
+.chat-typing { font-style: italic; opacity:.9; }
