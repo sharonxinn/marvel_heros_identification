@@ -12,6 +12,7 @@ from typing import Any
 import cv2
 import numpy as np
 import tensorflow as tf
+import uvicorn
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image, UnidentifiedImageError
@@ -140,17 +141,22 @@ async def chat_endpoint(payload: dict) -> dict:
 
 
 def crop_largest_face(image: Image.Image) -> np.ndarray:
-    """Return a padded crop of the largest detected face, or raise a useful API error."""
+    """Return a padded crop of the largest detected face, or fall back to a center crop."""
     rgb = np.asarray(image.convert("RGB"))
     gray = cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY)
+    gray = cv2.equalizeHist(gray)
     faces = FACE_DETECTOR.detectMultiScale(
-        gray, scaleFactor=1.1, minNeighbors=6, minSize=(60, 60)
+        gray, scaleFactor=1.08, minNeighbors=4, minSize=(40, 40)
     )
     if len(faces) == 0:
-        raise HTTPException(
-            status_code=422,
-            detail="No clear face was detected. Use a front-facing, well-lit portrait.",
-        )
+        height, width = rgb.shape[:2]
+        crop_size = int(min(width, height) * 0.9)
+        x1 = max(0, (width - crop_size) // 2)
+        y1 = max(0, (height - crop_size) // 2)
+        x2 = min(width, x1 + crop_size)
+        y2 = min(height, y1 + crop_size)
+        return rgb[y1:y2, x1:x2]
+
     x, y, width, height = max(faces, key=lambda face: face[2] * face[3])
     padding = int(max(width, height) * 0.22)
     x1, y1 = max(0, x - padding), max(0, y - padding)
@@ -210,3 +216,11 @@ async def classify(image: UploadFile = File(...)) -> dict[str, Any]:
         "confidence": best["confidence"],
         "top_predictions": predictions,
     }
+
+
+def main() -> None:
+    uvicorn.run(app, host="127.0.0.1", port=8000, reload=False)
+
+
+if __name__ == "__main__":
+    main()
