@@ -15,6 +15,7 @@ import tensorflow as tf
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image, UnidentifiedImageError
+import httpx
 
 ROOT = Path(__file__).resolve().parent.parent
 MODEL_PATH = ROOT / "models" / "hero_classifier.keras"
@@ -63,6 +64,79 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
+
+
+@app.get("/api/llm-health")
+def llm_health():
+    key = os.getenv("OPENAI_API_KEY")
+    base = os.getenv("OPENAI_API_BASE")
+    return {"available": bool(key), "provider_base": bool(base)}
+
+
+@app.post("/api/chat")
+async def chat_endpoint(payload: dict) -> dict:
+    """Proxy a short chat/summarization request to an OpenAI-compatible API.
+
+    Expected JSON payload: {"question": "...", "hero_id": "optional-id"}
+    The endpoint requires OPENAI_API_KEY in environment; optional OPENAI_API_BASE for alternative hosts.
+    """
+    question = str(payload.get("question" or ""))
+    hero_id = payload.get("hero_id")
+    if not question:
+        raise HTTPException(status_code=400, detail="Missing 'question' in request body.")
+
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise HTTPException(status_code=503, detail="LLM API key not configured on the server.")
+
+    # Build a compact prompt that includes the local profile when available
+    profile_text = ""
+    if hero_id:
+        # try to include a profile label file if present
+        labels = ModelStore.labels
+        if hero_id in labels:
+            # find profile in hero-data.js via the models folder is not available; so include label name
+            profile_text = f"Profile label: {hero_id}.\n"
+
+    system = (
+        "You are a concise assistant that answers questions about the provided Marvel hero dataset. "
+        "Use only the given profile text when present and avoid inventing canonical lore. "
+        "If the question is about a hero in the dataset, summarize abilities, affiliation, and a short story line." 
+    )
+
+    # Compose messages for an OpenAI Chat API
+    messages = [
+        {"role": "system", "content": system + ("\n\n" + profile_text if profile_text else "")},
+        {"role": "user", "content": question},
+    ]
+
+    openai_base = os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1")
+    model = os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")
+
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        try:
+            resp = await client.post(
+                f"{openai_base}/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                },
+                json={"model": model, "messages": messages, "max_tokens": 300, "temperature": 0.2},
+            )
+        except httpx.RequestError as exc:
+            raise HTTPException(status_code=502, detail=f"LLM request failed: {exc}") from exc
+
+    if resp.status_code != 200:
+        raise HTTPException(status_code=502, detail=f"LLM provider error: {resp.status_code} {resp.text}")
+
+    data = resp.json()
+    # try extracting assistant text from OpenAI-style reply
+    try:
+        content = data["choices"][0]["message"]["content"].strip()
+    except Exception:
+        content = data.get("error") or str(data)
+
+    return {"answer": content, "provider_response": {"status": resp.status_code}}
 
 
 def crop_largest_face(image: Image.Image) -> np.ndarray:

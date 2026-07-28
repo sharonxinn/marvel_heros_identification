@@ -335,45 +335,93 @@ function closeChatPanel() { chatPanel.classList.add('hidden'); }
 openChat && openChat.addEventListener('click', openChatPanel);
 closeChat && closeChat.addEventListener('click', closeChatPanel);
 
-function findHeroByQuery(q) {
-  const ql = q.toLowerCase();
-  // direct match by id, name, alias
-  const exact = window.HERO_PROFILES.find(h => h.id === ql || h.name.toLowerCase() === ql || h.alias.toLowerCase() === ql);
-  if (exact) return exact;
-  // partial match on name or alias
-  const partial = window.HERO_PROFILES.find(h => h.name.toLowerCase().includes(ql) || h.alias.toLowerCase().includes(ql));
-  if (partial) return partial;
-  return null;
+// Build a lightweight searchable index over the local profiles.
+const SEARCH_INDEX = heroes.map(h => ({
+  h,
+  text: `${h.id} ${h.name} ${h.alias} ${h.affiliation} ${h.role} ${h.story} ${h.traits.join(' ')}`.toLowerCase(),
+  name: h.name.toLowerCase(),
+  alias: h.alias.toLowerCase(),
+}));
+
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost);
+    }
+  }
+  return dp[m][n];
 }
 
-function scoreHeroForQuery(hero, tokens) {
-  const hay = `${hero.name} ${hero.alias} ${hero.story} ${hero.traits.join(' ')}`.toLowerCase();
-  let score = 0;
-  tokens.forEach(t => { if (hay.includes(t)) score += 1; });
-  return score;
+function fuzzyNameScore(name, query) {
+  if (!query) return 0;
+  const dist = levenshtein(name, query);
+  const maxLen = Math.max(name.length, query.length);
+  if (maxLen === 0) return 0;
+  return 1 - dist / maxLen; // 1.0 best, 0 worst
+}
+
+function searchHeroes(query) {
+  const q = (query || '').toLowerCase().trim();
+  const tokens = q.split(/\W+/).filter(Boolean);
+  return SEARCH_INDEX.map(({ h, text, name, alias }) => {
+    // token overlap score
+    let tokenMatches = 0;
+    tokens.forEach(t => { if (text.includes(t)) tokenMatches += 1; });
+    const tokenScore = tokens.length ? tokenMatches / tokens.length : 0;
+    // name similarity
+    const nameScore = Math.max(fuzzyNameScore(name, q), fuzzyNameScore(alias, q));
+    // final weighted score
+    const score = Math.min(1, tokenScore * 0.65 + nameScore * 0.45);
+    return { hero: h, score };
+  }).sort((a, b) => b.score - a.score);
+}
+
+function findHeroByQuery(q) {
+  const raw = (q || '').toLowerCase().trim();
+  if (!raw) return null;
+  // exact id/name/alias
+  const exact = heroes.find(h => h.id === raw || h.name.toLowerCase() === raw || h.alias.toLowerCase() === raw);
+  if (exact) return exact;
+  // search and return best if confident
+  const results = searchHeroes(raw);
+  if (results.length && results[0].score >= 0.5) return results[0].hero;
+  return null;
 }
 
 async function generateBotResponse(question) {
   const q = (question || '').trim();
   if (!q) return "Ask me about a hero's powers, affiliation, or story — try 'Who is Iron Man?'";
-  // quick list request
-  if (/list|all heroes|who are|show heroes|names of/.test(q.toLowerCase())) {
-    const names = window.HERO_PROFILES.slice(0, 12).map(h => h.name).join(', ');
-    return `Here are some heroes in the dataset: ${names} (and more). Ask about a name for details.`;
+  const ql = q.toLowerCase();
+  // list / search requests
+  if (/\b(list|all heroes|who are|show heroes|names of|search)\b/.test(ql)) {
+    const results = searchHeroes(ql).slice(0, 10).map(r => r.hero.name).join(', ');
+    return `Matching heroes: ${results}. Ask about a specific name for details.`;
   }
 
-  // try direct lookup
-  const direct = findHeroByQuery(q.replace(/who is |tell me about |what is |what are |powers of /ig, '').trim());
+  // strip common question prefixes for lookup
+  const cleaned = q.replace(/who is |tell me about |what is |what are |powers of |tell me the story of /ig, '').trim();
+  // direct/exact lookup
+  const direct = findHeroByQuery(cleaned);
   if (direct) {
     return `<strong>${direct.name}</strong> — alias: ${direct.alias}. Role: ${direct.role}. Affiliation: ${direct.affiliation}. Abilities: ${direct.traits.slice(1,4).join(', ')}. ${direct.story}`;
   }
 
-  // keyword scoring fallback
-  const tokens = q.toLowerCase().split(/\W+/).filter(Boolean);
-  const scored = window.HERO_PROFILES.map(h => ({ h, s: scoreHeroForQuery(h, tokens) })).sort((a,b) => b.s - a.s);
-  if (scored.length && scored[0].s > 0) {
-    const h = scored[0].h;
-    return `I think you might mean <strong>${h.name}</strong>. ${h.short} Abilities include: ${h.traits.slice(1,4).join(', ')}.`;
+  // fallback: ranked suggestions
+  const ranked = searchHeroes(ql).slice(0, 4);
+  if (ranked.length && ranked[0].score > 0.2) {
+    if (ranked[0].score >= 0.45) {
+      const h = ranked[0].hero;
+      return `I think you mean <strong>${h.name}</strong> — ${h.short} Abilities include: ${h.traits.slice(1,4).join(', ')}.`;
+    }
+    const suggestions = ranked.map(r => `${r.hero.name} (${Math.round(r.score * 100)}%)`).join(', ');
+    return `I couldn't be certain. Did you mean: ${suggestions}? Try one of those names.`;
   }
 
   return "I couldn't find a good match in the local profiles — try asking 'Who is Black Widow?' or use a character name.";
@@ -392,7 +440,25 @@ chatForm && chatForm.addEventListener('submit', async (ev) => {
   chatMessages.appendChild(typing);
   chatMessages.scrollTop = chatMessages.scrollHeight;
   try {
-    const reply = await generateBotResponse(text);
+    // Try backend LLM first, fallback to local generator
+    let reply = null;
+    try {
+      const resp = await fetch(`${API_BASE_URL}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: text }),
+      });
+      if (resp.ok) {
+        const payload = await resp.json();
+        reply = payload.answer || payload.answer_text || null;
+      }
+    } catch (e) {
+      // network error or backend not running — fallback below
+      reply = null;
+    }
+    if (!reply) {
+      reply = await generateBotResponse(text);
+    }
     typing.remove();
     appendMessage(reply, 'bot');
   } catch (e) {
