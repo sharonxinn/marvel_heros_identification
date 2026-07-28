@@ -279,3 +279,34 @@ document.querySelector("#view-all-button").addEventListener("click", event => { 
 
 renderArchive();
 checkModelStatus();
+
+// Theme toggle: persist preference and apply `data-theme="light"` when set.
+const themeToggle = document.querySelector('.theme-toggle');
+function applyTheme(theme) {
+  if (theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
+  else document.documentElement.removeAttribute('data-theme');
+  updateThemeLabel(theme);
+}
+function updateThemeLabel(theme) {
+  if (!themeToggle) return;
+  const label = themeToggle.querySelector('.theme-label');
+  if (label) label.textContent = theme === 'light' ? 'LIGHT' : 'DARK';
+  themeToggle.setAttribute('aria-label', theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
+}
+function initTheme() {
+  try {
+    const saved = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = saved || (prefersDark ? 'dark' : 'light');
+    applyTheme(theme);
+  } catch (e) { /* ignore storage errors */ }
+}
+if (themeToggle) {
+  themeToggle.addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    const next = current === 'light' ? 'dark' : 'light';
+    applyTheme(next);
+    try { localStorage.setItem('theme', next); } catch (e) { /* ignore */ }
+  });
+}
+initTheme();
